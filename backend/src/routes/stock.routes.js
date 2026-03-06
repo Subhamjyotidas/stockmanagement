@@ -4,6 +4,7 @@ const controller = require("../controllers/stock.controller");
 
 router.use(auth);
 
+router.get("/history", controller.getHistory);
 router.get("/", controller.getAll);
 router.post("/", controller.create);
 router.put("/:id", controller.update);

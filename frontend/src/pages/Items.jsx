@@ -84,8 +84,8 @@ export default function Items() {
         </div>
       </form>
 
-      {/* ================= TABLE ================= */}
-      <div className="table-responsive">
+      {/* ================= TABLE (Desktop) ================= */}
+      <div className="table-responsive d-none d-md-block">
         <table className="table table-bordered table-striped">
           <thead className="table-dark">
             <tr>
@@ -119,6 +119,34 @@ export default function Items() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* ================= MOBILE CARDS ================= */}
+      <div className="d-md-none">
+        {items.map((i) => (
+          <div key={i.id} className="border rounded p-3 mb-2">
+            <div className="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <div className="text-muted small">ID: {i.id}</div>
+                <b>{i.name}</b>
+              </div>
+            </div>
+            <div className="d-grid gap-2">
+              <button
+                className="btn btn-warning btn-sm"
+                onClick={() => editItem(i)}
+              >
+                Edit
+              </button>
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={() => deleteItem(i.id)}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </Layout>
   );

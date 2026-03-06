@@ -1,8 +1,23 @@
-const { Item } = require("../models");
+const { Item, Stock } = require("../models");
+const { Sequelize } = require("sequelize");
 
 exports.getAll = async (req, res) => {
   try {
-    const items = await Item.findAll({ order: [["id", "DESC"]] });
+    const items = await Item.findAll({
+      order: [["id", "DESC"]],
+      attributes: {
+        include: [
+          [
+            Sequelize.literal(`(
+              SELECT MIN(buyingPrice) 
+              FROM stock 
+              WHERE stock.itemId = item.id
+            )`),
+            "buyingPrice"
+          ]
+        ]
+      }
+    });
     res.json(items);
   } catch (err) {
     console.error(err);

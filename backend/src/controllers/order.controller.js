@@ -6,7 +6,8 @@ const {
   Item,
   Stock,
   StockMovement,
-  OrderPayment
+  OrderPayment,
+  PriceTierItem
 } = require("../models");
 const { Op, literal } = require("sequelize");
 
@@ -40,6 +41,8 @@ exports.create = async (req, res) => {
     const items = JSON.parse(req.body.items || "[]");
     if (!items.length) throw new Error("Items required");
 
+    const customer = await Customer.findByPk(customerId);
+
     let totalAmount = 0;
 
     // ✅ Upload image to GoDaddy server
@@ -59,8 +62,15 @@ exports.create = async (req, res) => {
 
     for (const it of items) {
       const qty = Number(it.qty);
-      const price = Number(it.sellingPrice);
-      totalAmount += qty * price;
+      let sellingPrice = Number(it.sellingPrice);
+      if ((!sellingPrice || isNaN(sellingPrice)) && customer?.priceTierId) {
+        const tierItem = await PriceTierItem.findOne({ where: { priceTierId: customer.priceTierId, itemId: it.itemId } });
+        if (!tierItem) {
+          throw new Error(`No price configured for item ${it.itemId} in customer's price tier`);
+        }
+        sellingPrice = Number(tierItem.sellingPrice);
+      }
+      totalAmount += qty * sellingPrice;
 
       const stock = await Stock.findOne({
         where: {
@@ -83,7 +93,7 @@ exports.create = async (req, res) => {
         orderId: order.id,
         itemId: it.itemId,
         buyingPrice: it.buyingPrice,
-        sellingPrice: it.sellingPrice,
+        sellingPrice: sellingPrice,
         qty
       }, { transaction: t });
 
@@ -277,6 +287,10 @@ exports.update = async (req, res) => {
   try {
     const items = JSON.parse(req.body.items || "[]");
 
+    const orderHeader = await Order.findByPk(id);
+    if (!orderHeader) { throw new Error("Order not found"); }
+    const customer = await Customer.findByPk(orderHeader.customerId);
+
     // 🔹 Fetch existing items
     const oldItems = await OrderItem.findAll({
       where: { orderId: id },
@@ -301,9 +315,16 @@ exports.update = async (req, res) => {
     // 🔹 Apply new items
     for (const it of items) {
       const qty = Number(it.qty);
-      const price = Number(it.sellingPrice);
+      let sellingPrice = Number(it.sellingPrice);
+      if ((!sellingPrice || isNaN(sellingPrice)) && customer?.priceTierId) {
+        const tierItem = await PriceTierItem.findOne({ where: { priceTierId: customer.priceTierId, itemId: it.itemId } });
+        if (!tierItem) {
+          throw new Error(`No price configured for item ${it.itemId} in customer's price tier`);
+        }
+        sellingPrice = Number(tierItem.sellingPrice);
+      }
 
-      totalAmount += qty * price;
+      totalAmount += qty * sellingPrice;
 
       const stock = await Stock.findOne({
         where: { itemId: it.itemId, buyingPrice: it.buyingPrice },
@@ -325,7 +346,7 @@ exports.update = async (req, res) => {
           orderId: id,
           itemId: it.itemId,
           buyingPrice: it.buyingPrice,
-          sellingPrice: it.sellingPrice,
+          sellingPrice: sellingPrice,
           qty
         },
         { transaction: t }
@@ -396,6 +417,41 @@ exports.remove = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+exports.getItemHistory = async (req, res) => {
+  const itemId = Number(req.params.itemId);
 
+  if (!itemId) {
+    return res.status(400).json({ message: "Invalid item id" });
+  }
 
+  try {
+    const rows = await OrderItem.findAll({
+      where: { itemId },
+      include: [
+        {
+          model: Order,
+          include: [{ model: Customer, as: "customer" }]
+        }
+      ],
+      order: [[Order, "billDate", "DESC"]]
+    });
 
+    const data = rows.map(oi => {
+      const order = oi.Order;
+      return {
+        orderId: oi.orderId,
+        billNo: order?.billNo,
+        billDate: order?.billDate,
+        customerName: order?.customer?.name || "",
+        qty: Number(oi.qty),
+        sellingPrice: Number(oi.sellingPrice),
+        lineTotal: Number(oi.qty) * Number(oi.sellingPrice)
+      };
+    });
+
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+};

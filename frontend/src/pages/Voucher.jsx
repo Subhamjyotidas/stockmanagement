@@ -113,8 +113,8 @@ export default function Voucher() {
         </div>
       </form>
 
-      {/* LIST */}
-      <div className="table-responsive">
+      {/* LIST (Desktop) */}
+      <div className="table-responsive d-none d-md-block">
         <table className="table table-bordered table-striped">
           <thead className="table-dark">
             <tr>
@@ -153,10 +153,51 @@ export default function Voucher() {
           </tbody>
         </table>
       </div>
-      <div className="d-flex justify-content-between">
-        <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}>Prev</button>
+
+      {/* Mobile Cards */}
+      <div className="d-md-none">
+        {rows.map(r => (
+          <div key={r.id} className="border rounded p-3 mb-2">
+            <div className="d-flex justify-content-between mb-2">
+              <b>{r.name}</b>
+              <span className="badge bg-success">₹{r.paidAmount}</span>
+            </div>
+            <div className="small text-muted mb-1">{r.comments}</div>
+            <div className="small text-muted mb-2">{r.date}</div>
+            <div className="d-grid gap-2">
+              <button
+                className="btn btn-warning btn-sm"
+                onClick={() => editRow(r)}
+              >
+                Edit
+              </button>
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={() => remove(r.id)}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="d-flex justify-content-between align-items-center mt-3">
+        <button 
+          className="btn btn-sm btn-secondary" 
+          disabled={page <= 1} 
+          onClick={() => setPage(p => p - 1)}
+        >
+          Prev
+        </button>
         <span>{page} / {pages}</span>
-        <button disabled={page >= pages} onClick={() => setPage(p => p + 1)}>Next</button>
+        <button 
+          className="btn btn-sm btn-secondary" 
+          disabled={page >= pages} 
+          onClick={() => setPage(p => p + 1)}
+        >
+          Next
+        </button>
       </div>
     </Layout>
   );

@@ -5,7 +5,7 @@ export default function Sidebar({ isOpen, onClose, onOpenCalc }) {
     <>
       {/* Desktop sidebar */}
       <div
-        className="bg-dark text-white vh-100 p-3 d-none d-md-block"
+        className="bg-dark text-white vh-110 p-3 d-none d-md-block"
         style={{ width: "240px" }}
       >
         <SidebarContent onOpenCalc={onOpenCalc} />
@@ -14,7 +14,7 @@ export default function Sidebar({ isOpen, onClose, onOpenCalc }) {
       {/* Mobile sidebar */}
       {isOpen && (
         <div
-          className="position-fixed top-0 start-0 vh-100 bg-dark text-white p-3"
+          className="position-fixed top-0 start-0 vh-100 bg-dark text-white p-3 overflow-y-auto"
           style={{ width: "240px", zIndex: 1050 }}
         >
           <button
@@ -54,6 +54,24 @@ function SidebarContent({ onClick,onOpenCalc}) {
         </li>
 
         <li className="nav-item">
+          <div className="nav-link text-white">
+            <FaBox /> Price Tiers
+          </div>
+          <ul className="nav flex-column ms-3">
+            <li className="nav-item">
+              <a className="nav-link text-white" href="/price-tiers" onClick={onClick}>
+                ▸ Manage Tiers
+              </a>
+            </li>
+            <li className="nav-item">
+              <a className="nav-link text-white" href="/price-tiers/assign" onClick={onClick}>
+                ▸ Assign to Customers
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <li className="nav-item">
           <a className="nav-link text-white" href="/items" onClick={onClick}>
             <FaBox /> Items
           </a>
@@ -62,6 +80,11 @@ function SidebarContent({ onClick,onOpenCalc}) {
         <li className="nav-item">
           <a className="nav-link text-white" href="/stock" onClick={onClick}>
             <FaBox /> Stock
+          </a>
+        </li>
+        <li className="nav-item">
+          <a className="nav-link text-white" href="/stock-history" onClick={onClick}>
+            <FaBox /> Stock History
           </a>
         </li>
 
@@ -73,6 +96,11 @@ function SidebarContent({ onClick,onOpenCalc}) {
         <li className="nav-item">
           <a className="nav-link text-white" href="/payment-history" onClick={onClick}>
             <FaBox /> Payment History
+          </a>
+        </li>
+        <li className="nav-item">
+          <a className="nav-link text-white" href="/ordered-item-history" onClick={onClick}>
+            <FaBox /> Ordered item history
           </a>
         </li>
         <li className="nav-item">

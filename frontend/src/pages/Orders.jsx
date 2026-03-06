@@ -44,6 +44,9 @@ export default function Orders() {
     qty: ""
   });
 
+  // Track the selected customer's price tier
+  const [selectedPriceTierId, setSelectedPriceTierId] = useState(null);
+
   const [items, setItems] = useState([]);
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -52,6 +55,20 @@ export default function Orders() {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
+  };
+
+  // Fetch tier-based price for a customer+item combination
+  const fetchTierPrice = async (customerId, itemId) => {
+    if (!customerId || !itemId) return null;
+    try {
+      const res = await api.get(`/price-tiers/pricing/resolve`, {
+        params: { customerId, itemId }
+      });
+      return res.data.sellingPrice;
+    } catch (err) {
+      // No tier price found, return null
+      return null;
+    }
   };
 
   /* ======================
@@ -359,9 +376,19 @@ export default function Orders() {
                   .map(c => ({ value: c.id, label: c.name }))
                   .find(opt => opt.value === header.customerId) || null
               }
-              onChange={opt =>
-                setHeader({ ...header, customerId: opt?.value || "" })
-              }
+            onChange={opt => {
+                const custId = opt?.value || "";
+                setHeader({ ...header, customerId: custId });
+                
+                // Find the selected customer and get their priceTierId
+                const cust = customers.find(c => c.id === custId);
+                setSelectedPriceTierId(cust?.priceTierId || null);
+              }}
+              onFocus={opt => {
+                // Find the selected customer and get their priceTierId
+                const cust = customers.find(c => c.id === opt?.value);
+                setSelectedPriceTierId(cust?.priceTierId || null);
+              }}
             />
           </div>
 
@@ -418,16 +445,27 @@ export default function Orders() {
                   }))
                   .find(opt => opt.value === currentItem.stockId) || null
               }
-              onChange={opt => {
+              onChange={async opt => {
                 if (!opt) return;
                 const s = opt.stockObj;
+
+                // Default selling price to buying price
+                let sellingPrice = s.buyingPrice;
+
+                // If customer has a price tier, try to get tier-based price
+                if (header.customerId && selectedPriceTierId) {
+                  const tierPrice = await fetchTierPrice(header.customerId, s.item.id);
+                  if (tierPrice !== null) {
+                    sellingPrice = tierPrice;
+                  }
+                }
 
                 setCurrentItem({
                   stockId: s.id,
                   itemId: s.item.id,
                   itemName: s.item.name,
                   buyingPrice: s.buyingPrice,
-                  sellingPrice: s.buyingPrice,
+                  sellingPrice: sellingPrice,
                   qty: 1
                 });
               }}
@@ -651,11 +689,11 @@ export default function Orders() {
               </div>
               <div className="d-flex justify-content-between mt-2">
                 <span>Profit/Loss</span>
-                <span className={`badge ${Number(calculateProfit(o) || 0) < 0
+                <span className={`badge ${Number(o.totalProfit || 0) < 0
                   ? "bg-danger-subtle text-danger"
                   : "bg-success-subtle text-success"
                   }`}>
-                  ₹{Number(calculateProfit(o) || 0).toFixed(2)}
+                  ₹{Number(o.totalProfit || 0).toFixed(2)}
                 </span>
               </div>
               <div className="d-grid gap-2 mt-3">

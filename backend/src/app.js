@@ -6,12 +6,23 @@ const sequelize = require("./config/database");
 const app = express();
 
 /* ===== GLOBAL MIDDLEWARE ===== */
+// Permissive CORS for local dev: allow localhost/127.0.0.1 any port
+const localhostRegex = [/^http:\/\/localhost:\d+$/, /^http:\/\/127\.0\.0\.1:\d+$/];
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
+    if (localhostRegex.some(re => re.test(origin))) return cb(null, true);
+    return cb(new Error("Not allowed by CORS"));
+  },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 204,
+  preflightContinue: false
 }));
+
+// Explicitly handle preflight for all routes
+app.options("*", cors());
 // app.use((req, res, next) => {
 //   if (req.body && typeof req.body === "object") {
 //     delete req.body.id;
@@ -34,6 +45,7 @@ app.use("/api/dashboard", require("./routes/dashboard.routes"));
 app.use("/api/payment-history", require("./routes/paymentHistory.routes"));
 app.use("/api/buyer-payments", require("./routes/buyerPayment.routes"));
 app.use("/api/voucher", require("./routes/voucher.routes"));
+app.use("/api/price-tiers", require("./routes/priceTier.routes"));
 
 /* ===== HEALTH CHECK ===== */
 app.get("/", (req, res) => {

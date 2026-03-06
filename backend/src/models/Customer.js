@@ -20,6 +20,10 @@ const Customer = sequelize.define(
     address: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    priceTierId: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: true
     }
   },
   {

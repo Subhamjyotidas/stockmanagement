@@ -82,7 +82,7 @@ export default function Stock() {
       {/* Add / Edit Form */}
       <form onSubmit={submit} className="card p-3 mb-3">
         <div className="row g-2">
-          <div className="col-md-4">
+          <div className="col-12 col-md-4">
             <select
               className="form-select"
               value={form.itemId}
@@ -97,7 +97,7 @@ export default function Stock() {
             </select>
           </div>
 
-          <div className="col-md-3">
+          <div className="col-12 col-md-3">
             <input
               type="number"
               className="form-control"
@@ -108,7 +108,7 @@ export default function Stock() {
             />
           </div>
 
-          <div className="col-md-3">
+          <div className="col-12 col-md-3">
             <input
               type="number"
               className="form-control"
@@ -119,7 +119,7 @@ export default function Stock() {
             />
           </div>
 
-          <div className="col-md-2 d-grid">
+          <div className="col-12 col-md-2 d-grid">
             <button className="btn btn-primary">
               {editingId ? "Update" : "Add"}
             </button>
@@ -135,40 +135,72 @@ export default function Stock() {
         onChange={e => setSearch(e.target.value)}
       />
 
-      {/* Table */}
-      <table className="table table-bordered table-striped">
-        <thead className="table-dark">
-          <tr>
-            <th>Item</th>
-            <th>Qty</th>
-            <th>Buying Price</th>
-            <th width="160">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedStock.map(s => (
-            <tr key={s.id}>
-              <td>{s.item?.name}</td>
-              <td>{s.qty}</td>
-              <td>{s.buyingPrice}</td>
-              <td>
-                <button
-                  className="btn btn-sm btn-warning me-2"
-                  onClick={() => editStock(s)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="btn btn-sm btn-danger"
-                  onClick={() => deleteStock(s.id)}
-                >
-                  Delete
-                </button>
-              </td>
+      {/* Table (Desktop) */}
+      <div className="table-responsive d-none d-md-block">
+        <table className="table table-bordered table-striped">
+          <thead className="table-dark">
+            <tr>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Buying Price</th>
+              <th width="160">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {sortedStock.map(s => (
+              <tr key={s.id}>
+                <td>{s.item?.name}</td>
+                <td>{s.qty}</td>
+                <td>{s.buyingPrice}</td>
+                <td>
+                  <button
+                    className="btn btn-sm btn-warning me-2"
+                    onClick={() => editStock(s)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="btn btn-sm btn-danger"
+                    onClick={() => deleteStock(s.id)}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="d-md-none">
+        {sortedStock.map(s => (
+          <div key={s.id} className="border rounded p-3 mb-2">
+            <div className="d-flex justify-content-between mb-2">
+              <b>{s.item?.name}</b>
+              <span className="badge bg-primary">Qty: {s.qty}</span>
+            </div>
+            <div className="d-flex justify-content-between mb-2">
+              <span>Buying Price:</span>
+              <b>₹{s.buyingPrice}</b>
+            </div>
+            <div className="d-grid gap-2">
+              <button
+                className="btn btn-warning btn-sm"
+                onClick={() => editStock(s)}
+              >
+                Edit
+              </button>
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={() => deleteStock(s.id)}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </Layout>
   );
 }

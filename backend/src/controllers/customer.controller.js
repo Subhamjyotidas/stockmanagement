@@ -37,11 +37,11 @@ exports.getAll = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    const { name, mobileNo, address } = req.body;
+    const { name, mobileNo, address, priceTierId } = req.body;
 
     const customer = await Customer.create(
-      { name, mobileNo, address },
-      { fields: ["name", "mobileNo", "address"] }
+      { name, mobileNo, address, priceTierId: priceTierId || null },
+      { fields: ["name", "mobileNo", "address", "priceTierId"] }
     );
 
     res.json(customer);
@@ -57,6 +57,7 @@ exports.update = async (req, res) => {
       name: req.body.name,
       mobileNo: req.body.mobileNo,
       address: req.body.address,
+      priceTierId: req.body.priceTierId || null,
     },
     {
       where: { id: req.params.id },

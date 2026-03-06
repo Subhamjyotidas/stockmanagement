@@ -67,8 +67,8 @@ export default function PaymentHistory() {
         </div>
       </div>
 
-      {/* List */}
-      <div className="table-responsive">
+      {/* List (Desktop) */}
+      <div className="table-responsive d-none d-md-block">
         <table className="table table-bordered">
           <thead className="table-light">
             <tr>
@@ -109,18 +109,49 @@ export default function PaymentHistory() {
                   </span>
                 </td>
                 <td>
-                  {/* <button
-                    className="btn btn-sm btn-outline-primary"
-                    onClick={() => openInvoice(r.orderId)}
-                  >
-                    Show Invoice
-                  </button> */}
                   <button className="btn btn-sm btn-info" onClick={() => openInvoice(r.id)}>Invoice</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="d-md-none">
+        {rows.length === 0 && (
+          <div className="text-center text-muted py-4">
+            {loading ? "Loading..." : "No records"}
+          </div>
+        )}
+        {rows.map((r, idx) => (
+          <div key={`${r.id}-${idx}`} className="border rounded p-3 mb-2">
+            <div className="d-flex justify-content-between mb-1">
+              <b>{r.billNo}</b>
+              <span className={`badge ${
+                r.paymentStatus === "paid"
+                  ? "bg-success"
+                  : "bg-warning text-dark"
+              }`}>
+                {r.paymentStatus}
+              </span>
+            </div>
+            <div className="small text-muted mb-1">{r.customer?.name}</div>
+            <div className="d-flex justify-content-between mb-1">
+              <span>Date:</span>
+              <span>{r.billDate}</span>
+            </div>
+            <div className="d-flex justify-content-between mb-1">
+              <span>Total:</span>
+              <b>₹{r.totalAmount}</b>
+            </div>
+            <div className="d-flex justify-content-between mb-2">
+              <span>Paid:</span>
+              <b>₹{r.paidAmount}</b>
+            </div>
+            <button className="btn btn-info btn-sm w-100" onClick={() => openInvoice(r.id)}>Invoice</button>
+          </div>
+        ))}
       </div>
 
       {/* INVOICE MODAL */}

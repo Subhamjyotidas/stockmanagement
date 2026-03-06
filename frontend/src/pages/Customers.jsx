@@ -126,8 +126,8 @@ export default function Customers() {
         </div>
       </form>
 
-      {/* ================= TABLE ================= */}
-      <div className="table-responsive">
+      {/* ================= TABLE (Desktop) ================= */}
+      <div className="table-responsive d-none d-md-block">
         <table className="table table-bordered table-striped">
           <thead className="table-dark">
             <tr>
@@ -163,6 +163,39 @@ export default function Customers() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* ================= MOBILE CARDS ================= */}
+      <div className="d-md-none">
+        {customers.map((c) => (
+          <div key={c.id} className="border rounded p-3 mb-2">
+            <div className="d-flex justify-content-between mb-2">
+              <b>{c.name}</b>
+            </div>
+            <div className="d-flex justify-content-between mb-1">
+              <span className="text-muted">Mobile:</span>
+              <span>{c.mobileNo}</span>
+            </div>
+            <div className="d-flex justify-content-between mb-2">
+              <span className="text-muted">Address:</span>
+              <span>{c.address}</span>
+            </div>
+            <div className="d-grid gap-2">
+              <button
+                className="btn btn-warning btn-sm"
+                onClick={() => editCustomer(c)}
+              >
+                Edit
+              </button>
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={() => deleteCustomer(c.id)}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
       <div className="d-flex justify-content-between align-items-center mt-3">
         <button
