@@ -113,7 +113,7 @@ function SidebarContent({ onClick,onOpenCalc}) {
             <FaBox /> Voucher
           </a>
         </li>
-         <li className="nav-item">
+<li className="nav-item">
           <button
             type="button"
             className="nav-link text-white btn btn-link text-start"
@@ -124,6 +124,12 @@ function SidebarContent({ onClick,onOpenCalc}) {
           >
             🧮 Calculator
           </button>
+        </li>
+
+        <li className="nav-item mt-3">
+          <a className="nav-link text-warning" href="/ai-analytics" onClick={onClick}>
+            🤖 AI Analytics
+          </a>
         </li>
       </ul>
     </>
